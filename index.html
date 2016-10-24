@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>MxCaptcha</title>
+	<style>
+		#MxCaptcha{
+			width: 300px;
+			display: block;
+		}
+		.mx-captcha_wrap{
+			position: relative;
+			width: 200px;
+			height: 30px;
+			margin: 20px;
+			border: 1px solid green;
+			overflow: hidden;
+		}
+		.mx-captcha_item{
+			position: absolute;
+			width: 28px;
+			height: 28px;
+			margin: 1px;
+			background-color: green;
+			top: 0px;
+			left: 0px;
+			cursor: pointer;
+		}
+	</style>
+</head>
+<body>
+	<form action="" id="MxCaptcha">
+		
+		<span id="MxCaptchaText">Перетащите квадрат вправо</span>
+		<div class="mx-captcha_wrap" id="MxCaptchaWrap">
+			<div class="mx-captcha_item" id="MxCaptchaItem"></div>
+		</div>
+		<input type="hidden" name="MxCaptcaCode" value="" id="MxCaptcaCode">
+		<input type="submit" value="Отправить">
+
+	</form>
+
+	<script>
+		
+		var keyCode = false,
+			MxCaptchaText = document.getElementById( 'MxCaptchaText' ),
+			MxCaptcaCode = document.getElementById( 'MxCaptcaCode' ),
+			MxCaptchaWrap = document.getElementById( 'MxCaptchaWrap' ),
+			MxCaptchaItem = document.getElementById( 'MxCaptchaItem' ),
+			MxCaptchaWrapWidth = MxCaptchaWrap.offsetWidth,
+			MxCaptchaItemWidth = MxCaptchaItem.offsetWidth,
+			posItemLeft = MxCaptchaItem.offsetLeft,
+			x = 0;
+
+		MxCaptchaItem.style.left = x + 'px';
+
+		function OpenForm(){
+			MxCaptchaWrap.style.borderColor = '#999';
+			MxCaptchaItem.style.background = '#999';
+			MxCaptcaCode.value = 'MxCaptcha';
+			MxCaptchaText.innerHTML = 'Форма разблокирована';
+			MxCaptchaText.style.color = 'green';
+		}
+		
+		function MxCaptchaMotion(){
+
+			MxCaptchaItem.onmousedown = function(){
+
+				var coordObject = MxCaptchaWrap.getBoundingClientRect();
+				posX = event.clientX - coordObject.left;
+				posItem = x;
+				widthForMouse = posX - posItem;
+
+				MxCaptchaWrap.onmousemove = function(){
+
+					posX = event.clientX - coordObject.left;
+					posItemLeft = MxCaptchaItem.offsetLeft;
+					if( keyCode == false ){
+						x = posX - widthForMouse;
+						if( posItemLeft > MxCaptchaWrapWidth - MxCaptchaItemWidth - 20 ){
+							x = MxCaptchaWrapWidth - MxCaptchaItemWidth - 4;
+							OpenForm();
+							keyCode = true;
+						}
+						if( posItemLeft < 0 ){
+							x = 2;
+						}
+						MxCaptchaItem.style.left = x + 'px';
+					}
+
+				}
+
+			}
+			
+			MxCaptchaWrap.onmouseout = function(){
+
+				MxCaptchaWrap.onmousemove = function(){
+					return;
+				}
+
+				if( posItemLeft < 0 ){
+					x = 2;
+				}
+
+				MxCaptchaItem.style.left = x + 'px';
+
+				if( keyCode == true ){
+					OpenForm();
+				}
+
+			}
+			MxCaptchaItem.onmouseup = function(){
+
+				MxCaptchaWrap.onmousemove = function(){
+					return;
+				}
+
+				if( keyCode == true ){
+					OpenForm();
+				}
+
+			}
+
+		}
+
+		MxCaptchaMotion();
+
+		document.getElementById( 'MxCaptcha' ).onsubmit = function(){
+
+			if( keyCode == false ){
+				MxCaptchaText.style.color = 'red';
+				MxCaptchaText.style.fontSize = '18px';
+				return false;
+			}
+
+		}
+
+	</script>
+</body>
+</html>
